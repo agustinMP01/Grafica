@@ -4,6 +4,8 @@ from OpenGL.GL import *
 
 import grafica.easy_shaders as es
 
+from modelo import Flappy
+
 if __name__=='__main__':
     if not glfw.init():
         sys.exit()
@@ -26,14 +28,28 @@ if __name__=='__main__':
     glPolygonMode(GL_FRONT,GL_FILL)
 
     #Modelos
+    flappy = Flappy(pipeline)
 
     #Modelo-Controlador
 
     #Ciclo While
+    t0 = glfw.get_time()
 
-t0 = glfw.get_time()
-while not glfw.window_should_close(window):
+    while not glfw.window_should_close(window):
+        ti = glfw.get_time()
+        dt = ti-t0
+        t0 = ti
 
-    ti = glfw.get_time()
-    dt = ti - t0
-    t0 = ti
+        #Atrapamos eventos
+        glfw.poll_events()
+
+        #Actualizamos modelos 
+        flappy.update(dt)
+
+        #Dibujamos modelos
+        glClear(GL_COLOR_BUFFER_BIT)
+        flappy.draw(pipeline)
+        glfw.swap_buffers(window)
+
+    #Terminamos app
+    glfw.terminate()

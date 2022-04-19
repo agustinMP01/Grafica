@@ -31,3 +31,16 @@ class Flappy(object):
         self.model = transform_flappy
         self.pos = 0
         self.alive = True
+
+        def move_up(self):
+            self.pos = 1
+
+        def draw(self,pipeline):
+            sg.drawSceneGraphNode(self.model,pipeline,"transform") 
+
+        def update(self, dt):
+            if self.pos == 1:
+                self.model.transform = tr.translate(0,0.5,0)
+            else:    
+                self.model.transform = tr.translate(0,-0.01,0)
+     
