@@ -5,6 +5,8 @@ from OpenGL.GL import *
 import grafica.easy_shaders as es
 
 from modelo import Flappy
+from controlador import Controller
+
 
 if __name__=='__main__':
     if not glfw.init():
@@ -20,6 +22,8 @@ if __name__=='__main__':
     glfw.make_context_current(window)    
 
     #Controlador
+    controller = Controller()
+    glfw.set_key_callback(window,controller.on_key)
 
     #Pipeline
     pipeline = es.SimpleTransformShaderProgram()
@@ -31,6 +35,8 @@ if __name__=='__main__':
     flappy = Flappy(pipeline)
 
     #Modelo-Controlador
+    controller.set_flappy(flappy)
+
 
     #Ciclo While
     t0 = glfw.get_time()
@@ -53,3 +59,4 @@ if __name__=='__main__':
 
     #Terminamos app
     glfw.terminate()
+    sys.exit()

@@ -15,32 +15,31 @@ class Flappy(object):
     
     def __init__(self,pipeline):
 
-        gpu_body_quad = create_gpu(bs.createColorQuad(0.8,0.8,0.8),pipeline)
-
-        body = sg.SceneGraphNode("body")
-        body.transform = tr.scale(0.125,0.125,1)
-        body.childs += [gpu_body_quad]
+        gpu_flappy = create_gpu(bs.createColorQuad(0.8,0.8,0.8),pipeline)
 
         flappy = sg.SceneGraphNode("flappy")
+        flappy.transform =tr.scale(0.125,0.125,0)
+        flappy.childs += [gpu_flappy]
 
-        flappy.childs += [body]
 
         transform_flappy = sg.SceneGraphNode("flappyTR")
         transform_flappy.childs += [flappy]
 
         self.model = transform_flappy
-        self.pos = 0
+        self.pos_y = 0
         self.alive = True
 
+
     def move_up(self):
-        self.pos = 1
+        self.pos_y += 0.5
 
     def draw(self,pipeline):
+
+        #Inicio en x=-0.25. En y actualizo para que caiga segun dt 
+        self.model.transform = tr.translate(-0.25,self.pos_y,0)
         sg.drawSceneGraphNode(self.model,pipeline,"transform") 
 
     def update(self, dt):
-        if self.pos == 1:
-            self.model.transform = tr.translate(0,0.5,0)
-        else:    
-            self.model.transform = tr.translate(0,-0.1,0)
+        self.pos_y -= dt
+        
      
