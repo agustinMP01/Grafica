@@ -18,7 +18,7 @@ class Flappy(object):
         gpu_body_quad = create_gpu(bs.createColorQuad(0.8,0.8,0.8),pipeline)
 
         body = sg.SceneGraphNode("body")
-        body.transform = tr.uniformScale(1)
+        body.transform = tr.scale(0.125,0.125,1)
         body.childs += [gpu_body_quad]
 
         flappy = sg.SceneGraphNode("flappy")
@@ -32,15 +32,15 @@ class Flappy(object):
         self.pos = 0
         self.alive = True
 
-        def move_up(self):
-            self.pos = 1
+    def move_up(self):
+        self.pos = 1
 
-        def draw(self,pipeline):
-            sg.drawSceneGraphNode(self.model,pipeline,"transform") 
+    def draw(self,pipeline):
+        sg.drawSceneGraphNode(self.model,pipeline,"transform") 
 
-        def update(self, dt):
-            if self.pos == 1:
-                self.model.transform = tr.translate(0,0.5,0)
-            else:    
-                self.model.transform = tr.translate(0,-0.01,0)
+    def update(self, dt):
+        if self.pos == 1:
+            self.model.transform = tr.translate(0,0.5,0)
+        else:    
+            self.model.transform = tr.translate(0,-0.1,0)
      
