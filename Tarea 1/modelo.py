@@ -1,9 +1,13 @@
 from cmath import sqrt
+from multiprocessing.connection import wait
 from random import random
+from typing import List
 import grafica.transformations as tr
 import grafica.basic_shapes as bs
 import grafica.scene_graph as sg
 import grafica.easy_shaders as es
+import glfw
+
 
 from OpenGL.GL import glClearColor, GL_STATIC_DRAW
 
@@ -123,6 +127,35 @@ class Pipe(object):
     def update(self,dt):
         self.pos_x -= dt
 
+class PipeGenerator(object):
+    pipes: List["Pipe"]
 
+    def __init__(self):
+        self.pipes = []
+        self.on = True
 
-#class PipeGenerator(object):
+    def create_pipe(self,pipeline):
+        if len(self.pipes) >= 3 or not self.on:
+            return
+
+        self.pipes.append(Pipe(pipeline))
+
+    def draw(self,pipeline):
+        for k in self.pipes:
+            if (glfw.get_time()//2):
+                k.draw(pipeline)
+
+    def update(self,dt):
+        for k in self.pipes:
+            k.update(dt)
+
+    def delete(self,d):
+        if len(d)==0:
+            return
+
+        remain_pipes = []
+        for k in self.pipes:
+            if k not in d:
+                remain_pipes.append(k)
+
+        self.pipes = remain_pipes    

@@ -4,9 +4,7 @@ from OpenGL.GL import *
 
 import grafica.easy_shaders as es
 
-from modelo import Flappy
-from modelo import Floor
-from modelo import Pipe
+from modelo import *
 from controlador import Controller
 
 
@@ -37,6 +35,7 @@ if __name__=='__main__':
     flappy = Flappy(pipeline)
     floor = Floor(pipeline)
     pipes = Pipe(pipeline)
+    gen = PipeGenerator()
 
     #Modelo-Controlador
     controller.set_flappy(flappy)
@@ -53,15 +52,22 @@ if __name__=='__main__':
         #Atrapamos eventos
         glfw.poll_events()
 
-        #Actualizamos modelos 
+        #Limpiamos pantalla
+        glClear(GL_COLOR_BUFFER_BIT)
+
+        #Dibujamos los modelos
+        flappy.draw(pipeline)        
+        floor.draw(pipeline)
+
+        #Actualizamos modelos
+        gen.create_pipe(pipeline)
+        gen.update(dt)
+        gen.draw(pipeline)
         flappy.update(dt)
         pipes.update(dt)
 
-        #Dibujamos modelos
-        glClear(GL_COLOR_BUFFER_BIT)
-        flappy.draw(pipeline)
-        pipes.draw(pipeline)   
-        floor.draw(pipeline)
+        #Logica*
+
         glfw.swap_buffers(window)
 
     #Terminamos app

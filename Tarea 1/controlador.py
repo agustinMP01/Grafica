@@ -9,13 +9,15 @@ class Controller(object):
     def __init__(self):
         self.flappy = None
 
+
     def set_flappy(self,f):
         self.flappy = f
-
 
     def on_key(self,window,key,scancode,action,mods):
         if not (action == glfw.PRESS):
             return
+
+        #No funciona, no se cierra de verdad    
         if key == glfw.KEY_ESCAPE:
             glfw.terminate()
             sys.exit()
