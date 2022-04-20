@@ -91,22 +91,22 @@ class Pipe(object):
 
         #Tuberia
         pipe = sg.SceneGraphNode("pipe")
-        pipe.transform = tr.identity
+        pipe.transform = tr.scale(0.3,0.8,0)
         pipe.childs += [gpu_pipe]
 
         #Tuberia arriba
         pipe_up = sg.SceneGraphNode("pipe up")
-        pipe.transform = tr.translate(0,0.5,0)
+        pipe_up.transform = tr.translate(0,1,0)
         pipe_up.childs += [pipe]
 
         #Tuberia abajo
         pipe_down = sg.SceneGraphNode("pipe down")
-        pipe.transform = tr.translate(0,-0.5,0)
+        pipe_down.transform = tr.translate(0,-0.4,0)
         pipe_down.childs += [pipe]
 
         #Ensamble de tuberias
         pipes = sg.SceneGraphNode("pipes")
-        pipes.transform = tr.scale(0.25,0.5,0)
+        #pipes.transform = tr.matmul([tr.scale(0.1,0.1,0)])
         pipes.childs += [pipe_up,pipe_down] 
 
         transform_pipes = sg.SceneGraphNode("pipesTR")

@@ -60,8 +60,8 @@ if __name__=='__main__':
         #Dibujamos modelos
         glClear(GL_COLOR_BUFFER_BIT)
         flappy.draw(pipeline)
+        pipes.draw(pipeline)   
         floor.draw(pipeline)
-        pipes.draw(pipeline)
         glfw.swap_buffers(window)
 
     #Terminamos app
