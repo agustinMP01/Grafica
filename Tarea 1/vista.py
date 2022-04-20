@@ -6,6 +6,7 @@ import grafica.easy_shaders as es
 
 from modelo import Flappy
 from modelo import Floor
+from modelo import Pipe
 from controlador import Controller
 
 
@@ -35,6 +36,7 @@ if __name__=='__main__':
     #Modelos
     flappy = Flappy(pipeline)
     floor = Floor(pipeline)
+    pipes = Pipe(pipeline)
 
     #Modelo-Controlador
     controller.set_flappy(flappy)
@@ -53,11 +55,13 @@ if __name__=='__main__':
 
         #Actualizamos modelos 
         flappy.update(dt)
+        pipes.update(dt)
 
         #Dibujamos modelos
         glClear(GL_COLOR_BUFFER_BIT)
         flappy.draw(pipeline)
         floor.draw(pipeline)
+        pipes.draw(pipeline)
         glfw.swap_buffers(window)
 
     #Terminamos app

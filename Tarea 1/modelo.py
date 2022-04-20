@@ -84,3 +84,44 @@ class Floor(object):
 
     def update(self):
         return
+
+class Pipe(object):
+    def __init__(self,pipeline):
+        gpu_pipe = create_gpu(bs.createColorQuad(0.8,0.8,0.8),pipeline)
+
+        #Tuberia
+        pipe = sg.SceneGraphNode("pipe")
+        pipe.transform = tr.identity
+        pipe.childs += [gpu_pipe]
+
+        #Tuberia arriba
+        pipe_up = sg.SceneGraphNode("pipe up")
+        pipe.transform = tr.translate(0,0.5,0)
+        pipe_up.childs += [pipe]
+
+        #Tuberia abajo
+        pipe_down = sg.SceneGraphNode("pipe down")
+        pipe.transform = tr.translate(0,-0.5,0)
+        pipe_down.childs += [pipe]
+
+        #Ensamble de tuberias
+        pipes = sg.SceneGraphNode("pipes")
+        pipes.transform = tr.scale(0.25,0.5,0)
+        pipes.childs += [pipe_up,pipe_down] 
+
+        transform_pipes = sg.SceneGraphNode("pipesTR")
+        transform_pipes.childs += [pipes]
+
+        self.model = transform_pipes
+        self.pos_x = 1
+
+    def draw(self,pipeline):
+        self.model.transform = tr.translate(self.pos_x,0,0)
+        sg.drawSceneGraphNode(self.model, pipeline, "transform")
+
+    def update(self,dt):
+        self.pos_x -= dt
+
+
+
+#class PipeGenerator(object):
