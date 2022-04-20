@@ -1,4 +1,5 @@
 from cmath import sqrt
+from random import random
 import grafica.transformations as tr
 import grafica.basic_shapes as bs
 import grafica.scene_graph as sg
@@ -91,7 +92,7 @@ class Pipe(object):
 
         #Tuberia
         pipe = sg.SceneGraphNode("pipe")
-        pipe.transform = tr.scale(0.3,0.8,0)
+        pipe.transform = tr.scale(0.3,0.8,0) #x=0.3 no tocar
         pipe.childs += [gpu_pipe]
 
         #Tuberia arriba
@@ -106,7 +107,6 @@ class Pipe(object):
 
         #Ensamble de tuberias
         pipes = sg.SceneGraphNode("pipes")
-        #pipes.transform = tr.matmul([tr.scale(0.1,0.1,0)])
         pipes.childs += [pipe_up,pipe_down] 
 
         transform_pipes = sg.SceneGraphNode("pipesTR")
@@ -114,9 +114,10 @@ class Pipe(object):
 
         self.model = transform_pipes
         self.pos_x = 1
+        self.pos_y = random()
 
     def draw(self,pipeline):
-        self.model.transform = tr.translate(self.pos_x,0,0)
+        self.model.transform = tr.translate(self.pos_x,self.pos_y-0.5,0)
         sg.drawSceneGraphNode(self.model, pipeline, "transform")
 
     def update(self,dt):
