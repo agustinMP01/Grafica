@@ -43,28 +43,32 @@ if __name__=='__main__':
 
     #Ciclo While
     t0 = glfw.get_time()
+    suma_dt = 0
 
     while not glfw.window_should_close(window):
         ti = glfw.get_time()
         dt = ti-t0
         t0 = ti
 
+        suma_dt += dt
+
         #Atrapamos eventos
         glfw.poll_events()
 
         #Limpiamos pantalla
         glClear(GL_COLOR_BUFFER_BIT)
-
-        #Dibujamos los modelos
-        flappy.draw(pipeline)        
-        floor.draw(pipeline)
-
-        #Actualizamos modelos
-        gen.create_pipe(pipeline)
+     
+        if suma_dt >= 1:
+            gen.create_pipe(pipeline)
+            suma_dt=0
         gen.update(dt)
-        gen.draw(pipeline)
         flappy.update(dt)
-        pipes.update(dt)
+
+        flappy.draw(pipeline)
+        gen.draw(pipeline)
+
+
+        floor.draw(pipeline)
 
         #Logica*
 

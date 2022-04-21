@@ -1,6 +1,6 @@
 from cmath import sqrt
 from multiprocessing.connection import wait
-from random import random
+from random import randint, random
 from typing import List
 import grafica.transformations as tr
 import grafica.basic_shapes as bs
@@ -117,12 +117,15 @@ class Pipe(object):
         transform_pipes.childs += [pipes]
 
         self.model = transform_pipes
-        self.pos_x = 1
-        self.pos_y = random()
+        self.pos_x = 1.5
+        self.pos_y = 0
 
     def draw(self,pipeline):
-        self.model.transform = tr.translate(self.pos_x,self.pos_y-0.5,0)
+
+        self.model.transform = tr.translate(self.pos_x,self.pos_y,0)
+
         sg.drawSceneGraphNode(self.model, pipeline, "transform")
+
 
     def update(self,dt):
         self.pos_x -= dt
@@ -138,24 +141,27 @@ class PipeGenerator(object):
         if len(self.pipes) >= 3 or not self.on:
             return
 
+        # if random() < 0.001:
         self.pipes.append(Pipe(pipeline))
+        for k in self.pipes:
+                            
+            if k.pos_y > 0.5 or k.pos_y <-0.5:
+                k.pos_y = 0
+            else:
+                sign = randint(-1,1)
+                alpha = 0.15
+                k.pos_y += sign*alpha
+
+
 
     def draw(self,pipeline):
         for k in self.pipes:
-            if (glfw.get_time()//2):
-                k.draw(pipeline)
+            k.draw(pipeline)
 
     def update(self,dt):
+
         for k in self.pipes:
+            if k.pos_x < -1:
+                self.pipes.pop(0)	
             k.update(dt)
 
-    def delete(self,d):
-        if len(d)==0:
-            return
-
-        remain_pipes = []
-        for k in self.pipes:
-            if k not in d:
-                remain_pipes.append(k)
-
-        self.pipes = remain_pipes    
