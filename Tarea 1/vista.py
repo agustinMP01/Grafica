@@ -42,7 +42,6 @@ if __name__=='__main__':
     #Modelo-Controlador
     controller.set_flappy(flappy)
 
-
     #Ciclo While
     t0 = glfw.get_time()
     suma_dt = 0
