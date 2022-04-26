@@ -96,7 +96,7 @@ class Pipe(object):
 
         #Tuberia
         pipe = sg.SceneGraphNode("pipe")
-        pipe.transform = tr.scale(0.3,0.8,0) #x=0.3 no tocar
+        pipe.transform = tr.scale(0.3,0.9,0) #x=0.3 no tocar
         pipe.childs += [gpu_pipe]
 
         #Tuberia arriba
@@ -120,6 +120,12 @@ class Pipe(object):
         self.pos_x = 1.5
         self.pos_y = 0
 
+        if random() <=0.66:
+            sign = randint(-1,1)
+            alpha = 0.15*randint(1,2)
+            self.pos_y += sign*alpha
+
+
     def draw(self,pipeline):
 
         self.model.transform = tr.translate(self.pos_x,self.pos_y,0)
@@ -141,16 +147,15 @@ class PipeGenerator(object):
         if len(self.pipes) >= 3 or not self.on:
             return
 
-        # if random() < 0.001:
         self.pipes.append(Pipe(pipeline))
-        for k in self.pipes:
+        # for k in self.pipes:
                             
-            if k.pos_y > 0.5 or k.pos_y <-0.5:
-                k.pos_y = 0
-            else:
-                sign = randint(-1,1)
-                alpha = 0.15
-                k.pos_y += sign*alpha
+        #     if k.pos_y > 0.5 or k.pos_y <-0.5:
+        #         k.pos_y = 0
+        #     else:
+        #         sign = randint(-1,1)
+        #         alpha = 0.15
+        #         k.pos_y += sign*alpha
 
 
 

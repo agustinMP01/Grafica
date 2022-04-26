@@ -61,6 +61,7 @@ if __name__=='__main__':
         if suma_dt >= 1:
             gen.create_pipe(pipeline)
             suma_dt=0
+            
         gen.update(dt)
         flappy.update(dt)
 
