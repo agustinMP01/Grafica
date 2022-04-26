@@ -46,6 +46,7 @@ if __name__=='__main__':
     #Ciclo While
     t0 = glfw.get_time()
     suma_dt = 0
+    counter = 2
 
     while not glfw.window_should_close(window):
         ti = glfw.get_time()
@@ -65,20 +66,24 @@ if __name__=='__main__':
         if suma_dt >= 1:
             gen.create_pipe(pipeline)
             suma_dt=0
-            
+            counter +=1
+        elif counter == 2:
+            gen.create_floor(pipeline)
+            counter = 0
+
         #Updates    
         gen.update(dt)
         flappy.update(dt)
         floor.update(dt)
         
         #Logica
-        # flappy.collide(gen)
+        flappy.collide(gen)
 
         #Draws
         bground.draw(pipeline) 
         flappy.draw(pipeline)
-        gen.draw(pipeline)
-        floor.draw(pipeline)
+        gen.draw_pipes(pipeline)
+        gen.draw_floor(pipeline)
 
         glfw.swap_buffers(window)
 

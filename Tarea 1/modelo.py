@@ -51,18 +51,17 @@ class Flappy(object):
         for p in pipes.pipes:
             if self.pos_y <= -0.49:
 
-                self.pos_y = -0.4
                 self.alive = False
                 pipes.die()
                 print('perdiste')
 
-            elif self.pos_y <= p.length_down and p.pos_x -0.125  < self.pos_x  < p.pos_x +0.125 :
+            elif self.pos_y <= p.length_down and p.pos_x -0.5  < self.pos_x  < p.pos_x :
 
                 self.alive = False
                 pipes.die()
                 print('perdiste abajo')
 
-            elif self.pos_y >= p.length_up and p.pos_x -0.125 < self.pos_x < p.pos_x +0.125  : 
+            elif self.pos_y >= p.length_up and p.pos_x-0.5  < self.pos_x < p.pos_x  : 
 
                 self.alive = False
                 pipes.die()
@@ -112,12 +111,12 @@ class Floor(object):
             getAssetPath("floor.png"), GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR)
 
         self.model = gpuFloor
-        self.pos_x = 0
+        self.pos_x = 2
 
     def draw(self,pipeline):
 
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "transform"),1,GL_TRUE,
-            tr.matmul([tr.translate(0,-0.8, 0),tr.scale(2, 0.5, 1)]))
+            tr.matmul([tr.translate(self.pos_x,-0.8, 0),tr.scale(2, 0.5, 1)]))
         pipeline.drawCall(self.model)
 
     def update(self,dt):
@@ -136,7 +135,7 @@ class Pipe(object):
 
 
         self.model = gpuPipe
-        self.pos_x = 1
+        self.pos_x = 2
         self.pos_y = 0
 
         sign = randint(-1,1)
@@ -169,9 +168,11 @@ class Pipe(object):
 
 class PipeGenerator(object):
     pipes: List["Pipe"]
+    floors: List["Floor"]
 
     def __init__(self):
         self.pipes = []
+        self.floors = []
         self.on = True
 
     def create_pipe(self,pipeline):
@@ -180,15 +181,26 @@ class PipeGenerator(object):
 
         self.pipes.append(Pipe(pipeline))
 
+    def create_floor(self,pipeline):
+        if len(self.floors)>=3 or not self.on:
+            return
+
+        self.floors.append(Floor(pipeline))
+
     def die(self):
         glClearColor(1,0,0,1)
         self.on = False
 
 
-    def draw(self,pipeline):
+    def draw_pipes(self,pipeline):
         for k in self.pipes:
             k.draw_up(pipeline) 
             k.draw_down(pipeline)
+
+
+    def draw_floor(self,pipeline):
+        for f in self.floors:
+            f.draw(pipeline)
 
     def update(self,dt):
 
@@ -196,6 +208,11 @@ class PipeGenerator(object):
             if k.pos_x <= -1.5:
                 self.pipes.pop(0)	
             k.update(dt)
+
+        for f in self.floors:
+            if f.pos_x <= -2:
+                self.floors.pop(0)
+            f.update(dt)    
 
 class Background(object):
     def __init__(self,pipeline):
