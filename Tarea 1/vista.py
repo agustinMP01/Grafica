@@ -58,20 +58,25 @@ if __name__=='__main__':
         #Limpiamos pantalla
         glClear(GL_COLOR_BUFFER_BIT)
      
+
+        #"CONTADOR" cada un tiempo determinado crea una pipe
         if suma_dt >= 1:
             gen.create_pipe(pipeline)
             suma_dt=0
             
+        #Updates    
         gen.update(dt)
         flappy.update(dt)
 
+        #Logica
+        flappy.collide(gen)
+
+        #Draws
         flappy.draw(pipeline)
         gen.draw(pipeline)
-
-
         floor.draw(pipeline)
 
-        #Logica*
+
 
         glfw.swap_buffers(window)
 
