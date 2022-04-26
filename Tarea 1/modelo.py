@@ -5,7 +5,7 @@ import grafica.transformations as tr
 import grafica.basic_shapes as bs
 import grafica.scene_graph as sg
 import grafica.easy_shaders as es
-
+import glfw
 
 from OpenGL.GL import glClearColor, GL_STATIC_DRAW
 
@@ -44,15 +44,24 @@ class Flappy(object):
             return
 
         for p in pipes.pipes:
-            if self.pos_y < -0.49:
+            if self.pos_y <= -0.49:
 
-                self.pos_y = 0.25
+                self.pos = -0.48
                 self.alive = False
-
-            if (not (p.length_down < self.pos_y < p.length_up)) and self.pos_x == p.pos_x:
-
-                self.pos_y = 0.25
+                pipes.die()
                 print('perdiste')
+
+            if self.pos_y <= p.length_down and p.pos_x < self.pos_x < p.pos_x + 0.25:
+
+                self.alive = False
+                pipes.die()
+                print('perdiste abajo')
+
+            if self.pos_y >= p.length_up and p.pos_x < self.pos_x < p.pos_x + 0.25: 
+
+                self.alive = False
+                pipes.die()
+                print('perdiste arriba')
 
     def draw(self,pipeline):
         
@@ -71,11 +80,13 @@ class Flappy(object):
             self.pos_y = 0.99
 
         #Caida libre en cada update
-        #self.pos_y += self.vel_y*dt
+        self.pos_y += self.vel_y*dt
 
         #Limite para velocidad al caer
         if self.vel_y > -terminal_vel:
             self.vel_y += grav*dt
+
+
 
 
 
@@ -102,42 +113,55 @@ class Floor(object):
 
 class Pipe(object):
     def __init__(self,pipeline):
-        gpu_pipe = create_gpu(bs.createColorQuad(0.8,0.8,0.8),pipeline)
-
+        gpu_pipe1 = create_gpu(bs.createColorQuad(0.1,0.5,0),pipeline)
+        gpu_pipe2 = create_gpu(bs.createColorQuad(0.5,0.1,0),pipeline)
         #Tuberia
         pipe = sg.SceneGraphNode("pipe")
-        pipe.transform = tr.scale(0.25,2,0) #x = 0.25, o sea, 2 flappys delta_y = 0.498 o sea 6 flappys
-        pipe.childs += [gpu_pipe]
+        pipe.transform = tr.identity() #x = 0.25, o sea, 2 flappys delta_y = 0.498 o sea 6 flappys
+        pipe.childs += [gpu_pipe1]
+
+        pipe2 = sg.SceneGraphNode("pipe2")
+        pipe2.transform = tr.identity()
+        pipe2.childs += [gpu_pipe1]
 
         #Tuberia arriba
         pipe_up = sg.SceneGraphNode("pipe up")
-        pipe_up.transform = tr.translate(0,1.25,0)
+        pipe_up.transform = tr.translate(0,0.75,0)
         pipe_up.childs += [pipe]
 
         #Tuberia abajo
         pipe_down = sg.SceneGraphNode("pipe down")
-        pipe_down.transform = tr.translate(0,-1.25,0)
-        pipe_down.childs += [pipe]
+        pipe_down.transform = tr.translate(0,-0.75,0)
+        pipe_down.childs += [pipe2]
+
+        #Al medio xd
+        pipe_media = sg.SceneGraphNode("wea pa medir")
+        pipe_media.transform =tr.scale(2,0.01,0)
+        pipe_media.childs += [gpu_pipe2]
 
         #Ensamble de tuberias
         pipes = sg.SceneGraphNode("pipes")
-        pipes.transform = tr.translate(0,0.25,0)
-        pipes.childs += [pipe_up,pipe_down] 
+        pipes.transform = tr.matmul([tr.scale(0.25,1,0),tr.translate(0,0.25,0)])
+        pipes.childs += [pipe_up,pipe_down,pipe_media] 
 
         transform_pipes = sg.SceneGraphNode("pipesTR")
         transform_pipes.childs += [pipes]
 
         self.model = transform_pipes
-        self.pos_x = 1.5
+        self.pos_x = 1
         self.pos_y = 0
 
+        sign = randint(-1,1)
+        alpha = 0.15*randint(1,2)
+
         if random() <=0.66:
-            sign = randint(-1,1)
-            alpha = 0.15*randint(1,2)
             self.pos_y += sign*alpha
 
-        self.length_up = self.pos_y 
-        self.length_down = self.pos_y 
+            self.length_up = self.pos_y +0.5
+            self.length_down = self.pos_y #Limite de la pipe abajo NO TOCAR
+
+        self.length_down = self.pos_y #Limite de la pipe abajo NO TOCAR
+        self.length_up = self.pos_y + 0.5
 
     def draw(self,pipeline):
 
@@ -157,10 +181,15 @@ class PipeGenerator(object):
         self.on = True
 
     def create_pipe(self,pipeline):
-        if len(self.pipes) >= 3 or not self.on:
+        if len(self.pipes) >= 4 or not self.on:
             return
 
         self.pipes.append(Pipe(pipeline))
+
+    def die(self):
+        glClearColor(1,0,0,1)
+        self.on = False
+
 
     def draw(self,pipeline):
         for k in self.pipes:
