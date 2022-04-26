@@ -46,18 +46,18 @@ class Flappy(object):
         for p in pipes.pipes:
             if self.pos_y <= -0.49:
 
-                self.pos = -0.48
+                self.pos_y = -0.4
                 self.alive = False
                 pipes.die()
                 print('perdiste')
 
-            if self.pos_y <= p.length_down and p.pos_x < self.pos_x < p.pos_x + 0.25:
+            if self.pos_y <= p.length_down and p.pos_x -0.125  < self.pos_x  < p.pos_x +0.125 :
 
                 self.alive = False
                 pipes.die()
                 print('perdiste abajo')
 
-            if self.pos_y >= p.length_up and p.pos_x < self.pos_x < p.pos_x + 0.25: 
+            if self.pos_y >= p.length_up and p.pos_x -0.125 < self.pos_x < p.pos_x +0.125  : 
 
                 self.alive = False
                 pipes.die()

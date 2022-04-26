@@ -60,7 +60,7 @@ if __name__=='__main__':
      
 
         #"CONTADOR" cada un tiempo determinado crea una pipe
-        if suma_dt >= 3:
+        if suma_dt >= 1:
             gen.create_pipe(pipeline)
             suma_dt=0
             
