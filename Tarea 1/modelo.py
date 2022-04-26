@@ -1,35 +1,36 @@
 
 from random import randint, random
 from typing import List
+from grafica.assets_path import getAssetPath
 import grafica.transformations as tr
 import grafica.basic_shapes as bs
 import grafica.scene_graph as sg
 import grafica.easy_shaders as es
-import glfw
+from grafica.gpu_shape import GPUShape
 
-from OpenGL.GL import glClearColor, GL_STATIC_DRAW
+import sys
+import os.path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from OpenGL.GL import *
 
-def create_gpu(shape, pipeline):
-    gpu = es.GPUShape().initBuffers()
-    pipeline.setupVAO(gpu)
-    gpu.fillBuffers(shape.vertices, shape.indices, GL_STATIC_DRAW)
-    return gpu
+# def create_gpu(shape, pipeline):
+#     gpu = es.GPUShape().initBuffers()
+#     pipeline.setupVAO(gpu)
+#     gpu.fillBuffers(shape.vertices, shape.indices, GL_STATIC_DRAW)
+#     return gpu
 
 class Flappy(object):
     
     def __init__(self,pipeline):
 
-        gpu_flappy = create_gpu(bs.createColorQuad(1,1,0.2),pipeline)
+        shape = bs.createTextureQuad(1,1)
+        gpuShape = es.GPUShape().initBuffers()
+        pipeline.setupVAO(gpuShape)
+        gpuShape.fillBuffers(shape.vertices, shape.indices, GL_STATIC_DRAW)
+        gpuShape.texture = es.textureSimpleSetup(
+            getAssetPath("mario.png"), GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR)
 
-        flappy = sg.SceneGraphNode("flappy")
-        flappy.transform =tr.scale(0.125,0.083,0)
-        flappy.childs += [gpu_flappy]
-
-
-        transform_flappy = sg.SceneGraphNode("flappyTR")
-        transform_flappy.childs += [flappy]
-
-        self.model = transform_flappy
+        self.model = gpuShape
 
         self.pos_y = 0.25
         self.pos_x = -0.25
@@ -73,10 +74,9 @@ class Flappy(object):
 
     def draw(self,pipeline):
         
-        #Inicio Flappy en x = pos_x, y = pos_y
-        self.model.transform = tr.translate(self.pos_x,self.pos_y,0)
-        sg.drawSceneGraphNode(self.model,pipeline,"transform") 
-
+        glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "transform"),1,GL_TRUE,tr.matmul([tr.translate(self.pos_x,self.pos_y,0),
+        tr.scale(0.25,0.25,0) ]))
+        pipeline.drawCall(self.model)
 
     def update(self, dt):
 
@@ -104,61 +104,38 @@ class Flappy(object):
 class Floor(object):
 
     def __init__(self,pipeline):
-        gpu_floor = create_gpu(bs.createColorQuad(0.67,1,0.18),pipeline)
+        floor = bs.createTextureQuad(5,1)
+        gpuFloor = es.GPUShape().initBuffers()
+        pipeline.setupVAO(gpuFloor)
+        gpuFloor.fillBuffers(floor.vertices, floor.indices, GL_STATIC_DRAW)
+        gpuFloor.texture = es.textureSimpleSetup(
+            getAssetPath("floor.png"), GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR)
 
-        floor = sg.SceneGraphNode("floor")
-        floor.transform =tr.scale(2,1,0)
-        floor.childs += [gpu_floor]
-
-        transform_floor = sg.SceneGraphNode("floorTR")
-        transform_floor.childs += [floor]
-
-        self.model=transform_floor
+        self.model = gpuFloor
+        self.pos_x = 0
 
     def draw(self,pipeline):
-        self.model.transform = tr.translate(0,-1,0)
-        sg.drawSceneGraphNode(self.model,pipeline,"transform")
 
-    def update(self):
-        return
+        glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "transform"),1,GL_TRUE,
+            tr.matmul([tr.translate(0,-0.8, 0),tr.scale(2, 0.5, 1)]))
+        pipeline.drawCall(self.model)
+
+    def update(self,dt):
+        self.pos_x -= dt
+
 
 class Pipe(object):
     def __init__(self,pipeline):
-        gpu_pipe1 = create_gpu(bs.createColorQuad(0.1,0.5,0),pipeline)
-        gpu_pipe2 = create_gpu(bs.createColorQuad(0.5,0.1,0),pipeline)
-        #Tuberia
-        pipe = sg.SceneGraphNode("pipe")
-        pipe.transform = tr.identity() #x = 0.25, o sea, 2 flappys delta_y = 0.498 o sea 6 flappys
-        pipe.childs += [gpu_pipe1]
 
-        pipe2 = sg.SceneGraphNode("pipe2")
-        pipe2.transform = tr.identity()
-        pipe2.childs += [gpu_pipe1]
+        pipe = bs.createTextureQuad(2,3)
+        gpuPipe = es.GPUShape().initBuffers()
+        pipeline.setupVAO(gpuPipe)
+        gpuPipe.fillBuffers(pipe.vertices, pipe.indices, GL_STATIC_DRAW)
+        gpuPipe.texture = es.textureSimpleSetup(
+            getAssetPath("skewer_down.png"), GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_NEAREST, GL_NEAREST)
 
-        #Tuberia arriba
-        pipe_up = sg.SceneGraphNode("pipe up")
-        pipe_up.transform = tr.translate(0,0.75,0)
-        pipe_up.childs += [pipe]
 
-        #Tuberia abajo
-        pipe_down = sg.SceneGraphNode("pipe down")
-        pipe_down.transform = tr.translate(0,-0.75,0)
-        pipe_down.childs += [pipe2]
-
-        #Al medio xd
-        pipe_media = sg.SceneGraphNode("wea pa medir")
-        pipe_media.transform =tr.scale(2,0.01,0)
-        pipe_media.childs += [gpu_pipe2]
-
-        #Ensamble de tuberias
-        pipes = sg.SceneGraphNode("pipes")
-        pipes.transform = tr.matmul([tr.scale(0.25,1,0),tr.translate(0,0.25,0)])
-        pipes.childs += [pipe_up,pipe_down,pipe_media] 
-
-        transform_pipes = sg.SceneGraphNode("pipesTR")
-        transform_pipes.childs += [pipes]
-
-        self.model = transform_pipes
+        self.model = gpuPipe
         self.pos_x = 1
         self.pos_y = 0
 
@@ -174,12 +151,18 @@ class Pipe(object):
         self.length_down = self.pos_y #Limite de la pipe abajo NO TOCAR
         self.length_up = self.pos_y + 0.5
 
-    def draw(self,pipeline):
+    def draw_down(self,pipeline):
 
-        self.model.transform = tr.translate(self.pos_x,self.pos_y,0)
+        glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "transform"), 1, GL_TRUE, tr.matmul([
+            tr.translate(self.pos_x, self.pos_y-0.5, 0),tr.scale(1, 1, 0)]))
+        pipeline.drawCall(self.model)  
+        
+    def draw_up(self,pipeline):
 
-        sg.drawSceneGraphNode(self.model, pipeline, "transform")
-
+        glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "transform"), 1, GL_TRUE, tr.matmul([
+            tr.translate(self.pos_x, self.pos_y+1, 0),tr.scale(1, -1, 0)]))
+        pipeline.drawCall(self.model)  
+            
 
     def update(self,dt):
         self.pos_x -= dt
@@ -204,7 +187,8 @@ class PipeGenerator(object):
 
     def draw(self,pipeline):
         for k in self.pipes:
-            k.draw(pipeline)
+            k.draw_up(pipeline) 
+            k.draw_down(pipeline)
 
     def update(self,dt):
 
@@ -213,3 +197,19 @@ class PipeGenerator(object):
                 self.pipes.pop(0)	
             k.update(dt)
 
+class Background(object):
+    def __init__(self,pipeline):
+
+        background = bs.createTextureQuad(1,1)
+        gpuBackground = es.GPUShape().initBuffers()
+        pipeline.setupVAO(gpuBackground)
+        gpuBackground.fillBuffers(background.vertices, background.indices, GL_STATIC_DRAW)
+        gpuBackground.texture = es.textureSimpleSetup(
+            getAssetPath("background2.png"), GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_NEAREST, GL_NEAREST)
+
+        self.model = gpuBackground
+
+    def draw(self,pipeline):
+
+        glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "transform"), 1, GL_TRUE, tr.scale(2,2,1))
+        pipeline.drawCall(self.model)

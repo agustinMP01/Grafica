@@ -25,17 +25,19 @@ if __name__=='__main__':
     controller = Controller()
     glfw.set_key_callback(window,controller.on_key)
 
-    #Pipeline
-    pipeline = es.SimpleTransformShaderProgram()
+    #Pipeline MAIN
+    pipeline = es.SimpleTextureTransformShaderProgram()
     glUseProgram(pipeline.shaderProgram)
     glClearColor(0,0.8,1,1)
-    glPolygonMode(GL_FRONT,GL_FILL)
+    glEnable(GL_BLEND)
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
     #Modelos
     flappy = Flappy(pipeline)
     floor = Floor(pipeline)
     pipes = Pipe(pipeline)
     gen = PipeGenerator()
+    bground = Background(pipeline)
 
     #Modelo-Controlador
     controller.set_flappy(flappy)
@@ -57,7 +59,7 @@ if __name__=='__main__':
 
         #Limpiamos pantalla
         glClear(GL_COLOR_BUFFER_BIT)
-     
+   
 
         #"CONTADOR" cada un tiempo determinado crea una pipe
         if suma_dt >= 1:
@@ -67,11 +69,13 @@ if __name__=='__main__':
         #Updates    
         gen.update(dt)
         flappy.update(dt)
-
+        floor.update(dt)
+        
         #Logica
-        flappy.collide(gen)
+        # flappy.collide(gen)
 
         #Draws
+        bground.draw(pipeline) 
         flappy.draw(pipeline)
         gen.draw(pipeline)
         floor.draw(pipeline)
