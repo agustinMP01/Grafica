@@ -30,10 +30,14 @@ class Flappy(object):
         transform_flappy.childs += [flappy]
 
         self.model = transform_flappy
+
         self.pos_y = 0.25
         self.pos_x = -0.25
         self.vel_y= 0
+
         self.alive = True
+
+        self.score = 0
 
     def move_up(self):
         #Otorga velocidad vertical a flappy para poder volar
@@ -51,17 +55,21 @@ class Flappy(object):
                 pipes.die()
                 print('perdiste')
 
-            if self.pos_y <= p.length_down and p.pos_x -0.125  < self.pos_x  < p.pos_x +0.125 :
+            elif self.pos_y <= p.length_down and p.pos_x -0.125  < self.pos_x  < p.pos_x +0.125 :
 
                 self.alive = False
                 pipes.die()
                 print('perdiste abajo')
 
-            if self.pos_y >= p.length_up and p.pos_x -0.125 < self.pos_x < p.pos_x +0.125  : 
+            elif self.pos_y >= p.length_up and p.pos_x -0.125 < self.pos_x < p.pos_x +0.125  : 
 
                 self.alive = False
                 pipes.die()
                 print('perdiste arriba')
+            
+            elif p.length_down<=self.pos_y <= p.length_up and -0.121<=p.pos_x <= -0.120:
+                self.score += 1
+                print('tu puntuacion es:',self.score)
 
     def draw(self,pipeline):
         
@@ -75,6 +83,9 @@ class Flappy(object):
         #Gravedad y velocidad terminal que afectan a flappy
         grav = -2
         terminal_vel = 2
+
+        if not self.alive:
+            self.pos_y = 0.25
 
         while self.pos_y > 0.99:
             self.pos_y = 0.99
@@ -198,7 +209,7 @@ class PipeGenerator(object):
     def update(self,dt):
 
         for k in self.pipes:
-            if k.pos_x < -1:
+            if k.pos_x <= -1.5:
                 self.pipes.pop(0)	
             k.update(dt)
 
