@@ -12,7 +12,7 @@ if __name__=='__main__':
     if not glfw.init():
         sys.exit()
 
-
+    goal = int(sys.argv[1])
     #Ventana
     width, height = 640, 960
     window = glfw.create_window(width,height,'Falppy Berd',None,None)      
@@ -77,6 +77,9 @@ if __name__=='__main__':
         
         #Logica
         flappy.collide(gen)
+        if int(flappy.score) >= goal:
+            print("Ganaste!")
+            glfw.set_window_should_close(window, True)
 
         #Draws
         bground.draw(pipeline) 

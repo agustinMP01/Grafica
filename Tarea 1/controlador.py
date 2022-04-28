@@ -19,8 +19,8 @@ class Controller(object):
 
         #No funciona, no se cierra de verdad    
         if key == glfw.KEY_ESCAPE:
-            glfw.terminate()
-            sys.exit()
+            glfw.set_window_should_close(window, True)
+
 
         #Pasar los eventos la modelo
         elif key == glfw.KEY_UP and action == glfw.PRESS:

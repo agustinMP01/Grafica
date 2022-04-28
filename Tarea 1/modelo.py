@@ -67,7 +67,7 @@ class Flappy(object):
                 pipes.die()
                 print('perdiste arriba')
             
-            elif -0.122<=p.pos_x <= -0.120:
+            elif -0.122<=p.pos_x <= -0.119:
                 self.score += 1
                 print('tu puntuacion es:',self.score)
 
