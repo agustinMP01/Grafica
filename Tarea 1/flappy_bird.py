@@ -14,7 +14,7 @@ if __name__=='__main__':
 
     #Ventana
     width, height = 640, 960
-    window = glfw.create_window(width,height,'Falppy Berd',None,None)      
+    window = glfw.create_window(width,height,'Mario Waton: Está waton',None,None)      
     if not window:
         glfw.terminate()
         sys.exit()
@@ -81,7 +81,10 @@ if __name__=='__main__':
         gen.update(dt)
         flappy.update(dt)
         floor.update(dt)
-        
+
+        if not flappy.hit:
+            score.udpate(gen)
+
         #Logica
         flappy.collide(gen)
 
@@ -91,7 +94,7 @@ if __name__=='__main__':
 
         if flappy.alive:
             flappy.draw(pipeline)
-            
+
         gen.draw_pipes(pipeline)
         gen.draw_floor(pipeline)
 
@@ -101,11 +104,14 @@ if __name__=='__main__':
 
         if score.score >= score.goal:
             gen.on = False
+            flappy.alive = False
             menus.draw_victory(pipeline)
             
         if not menus.on:
             menus.draw_main(pipeline)
 
+        if flappy.alive:
+            score.draw(pipeline)
 
         glfw.swap_buffers(window)
 

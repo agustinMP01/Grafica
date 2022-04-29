@@ -14,12 +14,6 @@ import os.path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from OpenGL.GL import *
 
-# def create_gpu(shape, pipeline):
-#     gpu = es.GPUShape().initBuffers()
-#     pipeline.setupVAO(gpu)
-#     gpu.fillBuffers(shape.vertices, shape.indices, GL_STATIC_DRAW)
-#     return gpu
-
 class Flappy(object):
     
     def __init__(self,pipeline):
@@ -54,7 +48,6 @@ class Flappy(object):
 
                 self.alive = False
                 pipes.die()
-                print('perdiste')
                 self.hit = True
 
             elif self.pos_y <= p.length_down and p.pos_x -0.5  < self.pos_x  < p.pos_x :
@@ -62,14 +55,12 @@ class Flappy(object):
                 self.alive = False
                 pipes.die()
                 self.hit = True
-                print('perdiste abajo')
 
             elif self.pos_y >= p.length_up and p.pos_x-0.5  < self.pos_x < p.pos_x  : 
 
                 self.alive = False
                 pipes.die()
                 self.hit = True 
-                print('perdiste arriba')
         
 
     def draw(self,pipeline):
@@ -100,9 +91,6 @@ class Flappy(object):
 
         else:
             return
-
-
-
 
 class Floor(object):
 
@@ -270,7 +258,7 @@ class Menus(object):
         self.on = False
 
     def draw_victory(self,pipeline):
-        glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "transform"), 1, GL_TRUE, tr.scale(1,1,1))
+        glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "transform"), 1, GL_TRUE, tr.scale(1.5,0.5,1))
         pipeline.drawCall(self.victory)
  
     def draw_lose(self,pipeline):
@@ -289,18 +277,67 @@ class Score(object):
 
     def __init__(self,pipeline):
 
-        score = bs.createTextureQuad(1,1)
-        gpuScore = es.GPUShape().initBuffers()
-        pipeline.setupVAO(gpuScore)
-        gpuScore.fillBuffers(score.vertices, score.indices, GL_STATIC_DRAW) 
+        score_unit = bs.createTextureQuad(1,1)
+        gpuScore_unit = es.GPUShape().initBuffers()
+        pipeline.setupVAO(gpuScore_unit)
+        gpuScore_unit.fillBuffers(score_unit.vertices, score_unit.indices, GL_STATIC_DRAW) 
 
-        self.model = gpuScore
+        self.score_u = gpuScore_unit
+
+        score_ten = bs.createTextureQuad(1,1)
+        gpuScore_ten = es.GPUShape().initBuffers()
+        pipeline.setupVAO(gpuScore_ten)
+        gpuScore_ten.fillBuffers(score_ten.vertices, score_ten.indices, GL_STATIC_DRAW)
+
+        self.score_ten = gpuScore_ten
+
         self.score = 0
         self.goal = 0
 
-    def score_up(self,pipe):
 
-        if -0.122<=pipe.pos_x <= -0.120:
-            self.score += 1
-            print('tu puntuacion es:',self.score)
+    def separate(self, integer):
+
+        integer_list = list(map(int,str(integer)))
+        return integer_list
+
+    def set_texture(self,score):
+        list = self.separate(score)
+        int_to_png = {0:"0.png",1:"1.png",2: "2.png",
+                     3:"3.png",4:"4.png",5:"5.png",
+                     6:"6.png",7:"7.png",8:"8.png",9:"9.png"}
+
+        if len(list) == 1: #ES UNA UNIDAD
+            self.score_u.texture = es.textureSimpleSetup(
+                getAssetPath("0.png"), GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_NEAREST, GL_NEAREST)
+
+            self.score_ten.texture = es.textureSimpleSetup(
+                getAssetPath(int_to_png[list[0]]), GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_NEAREST, GL_NEAREST)
+
+        else: #Tiene 2 digitos (Asumo que nadie jugara +100 puntos)
+            self.score_u.texture = es.textureSimpleSetup(
+                getAssetPath(int_to_png[list[0]]), GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_NEAREST, GL_NEAREST)
+
+            self.score_ten.texture = es.textureSimpleSetup(
+                getAssetPath(int_to_png[list[1]]), GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_NEAREST, GL_NEAREST)                    
+
+
+    def draw(self,pipeline):
+
+        glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "transform"), 1, GL_TRUE, tr.matmul([
+            tr.translate(-0.05,0.8,0),tr.scale(0.1,0.1,1)]))
+        pipeline.drawCall(self.score_u)  
+
+        glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "transform"), 1, GL_TRUE, tr.matmul([
+            tr.translate(0.05,0.8,0),tr.scale(0.1,0.1,1)]))
+        pipeline.drawCall(self.score_ten)  
+
+
+    def udpate(self, pipes: 'PipeGenerator'):
+
+        for p in pipes.pipes:
+            eps = 0.0018
+            if -0.25-eps<=p.pos_x <= -0.25+eps:
+                self.score += 1
+
+        self.set_texture(self.score)       
 
