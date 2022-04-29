@@ -12,7 +12,6 @@ if __name__=='__main__':
     if not glfw.init():
         sys.exit()
 
-    goal = int(sys.argv[1])
     #Ventana
     width, height = 640, 960
     window = glfw.create_window(width,height,'Falppy Berd',None,None)      
@@ -38,14 +37,22 @@ if __name__=='__main__':
     pipes = Pipe(pipeline)
     gen = PipeGenerator()
     bground = Background(pipeline)
+    score = Score(pipeline)
+    menus = Menus(pipeline)
+
+    #Seteamos la cantidad de puntos para ganar
+    score.goal = int(sys.argv[1])
 
     #Modelo-Controlador
     controller.set_flappy(flappy)
+    controller.set_gen(gen)
+    controller.set_menu(menus)
 
     #Ciclo While
     t0 = glfw.get_time()
     suma_dt = 0
     counter = 2
+
 
     while not glfw.window_should_close(window):
         ti = glfw.get_time()
@@ -61,7 +68,7 @@ if __name__=='__main__':
         glClear(GL_COLOR_BUFFER_BIT)
    
 
-        #"CONTADOR" cada un tiempo determinado crea una pipe
+        #"CONTADOR" cada un tiempo determinado crea una pipe y un floor
         if suma_dt >= 1:
             gen.create_pipe(pipeline)
             suma_dt=0
@@ -77,15 +84,28 @@ if __name__=='__main__':
         
         #Logica
         flappy.collide(gen)
-        if int(flappy.score) >= goal:
-            print("Ganaste!")
-            glfw.set_window_should_close(window, True)
+
 
         #Draws
         bground.draw(pipeline) 
-        flappy.draw(pipeline)
+
+        if flappy.alive:
+            flappy.draw(pipeline)
+            
         gen.draw_pipes(pipeline)
         gen.draw_floor(pipeline)
+
+        if not flappy.alive and flappy.hit:
+            menus.draw_lose(pipeline)
+
+
+        if score.score >= score.goal:
+            gen.on = False
+            menus.draw_victory(pipeline)
+            
+        if not menus.on:
+            menus.draw_main(pipeline)
+
 
         glfw.swap_buffers(window)
 

@@ -7,6 +7,7 @@ import grafica.basic_shapes as bs
 import grafica.scene_graph as sg
 import grafica.easy_shaders as es
 from grafica.gpu_shape import GPUShape
+from typing import Optional
 
 import sys
 import os.path
@@ -36,15 +37,15 @@ class Flappy(object):
         self.pos_x = -0.25
         self.vel_y= 0
 
-        self.alive = True
-
-        self.score = 0
+        self.alive = False
+        self.hit = False
 
     def move_up(self):
         #Otorga velocidad vertical a flappy para poder volar
         self.vel_y = 1
 
     def collide(self, pipes: 'PipeGenerator'):
+
         if not pipes.on:
             return
 
@@ -54,22 +55,22 @@ class Flappy(object):
                 self.alive = False
                 pipes.die()
                 print('perdiste')
+                self.hit = True
 
             elif self.pos_y <= p.length_down and p.pos_x -0.5  < self.pos_x  < p.pos_x :
 
                 self.alive = False
                 pipes.die()
+                self.hit = True
                 print('perdiste abajo')
 
             elif self.pos_y >= p.length_up and p.pos_x-0.5  < self.pos_x < p.pos_x  : 
 
                 self.alive = False
                 pipes.die()
+                self.hit = True 
                 print('perdiste arriba')
-            
-            elif -0.122<=p.pos_x <= -0.119:
-                self.score += 1
-                print('tu puntuacion es:',self.score)
+        
 
     def draw(self,pipeline):
         
@@ -79,23 +80,26 @@ class Flappy(object):
 
     def update(self, dt):
 
+        if self.alive:
         #Gravedad y velocidad terminal que afectan a flappy
-        grav = -2
-        terminal_vel = 2
+            grav = -2
+            terminal_vel = 2
 
-        if not self.alive:
-            self.pos_y = 0.25
+            if not self.alive:
+                self.pos_y = 0.25
 
-        while self.pos_y > 0.99:
-            self.pos_y = 0.99
+            while self.pos_y > 0.99:
+                self.pos_y = 0.99
 
         #Caida libre en cada update
-        self.pos_y += self.vel_y*dt
+            self.pos_y += self.vel_y*dt
 
         #Limite para velocidad al caer
-        if self.vel_y > -terminal_vel:
-            self.vel_y += grav*dt
+            if self.vel_y > -terminal_vel:
+                self.vel_y += grav*dt
 
+        else:
+            return
 
 
 
@@ -173,7 +177,7 @@ class PipeGenerator(object):
     def __init__(self):
         self.pipes = []
         self.floors = []
-        self.on = True
+        self.on = False
 
     def create_pipe(self,pipeline):
         if len(self.pipes) >= 4 or not self.on:
@@ -188,7 +192,6 @@ class PipeGenerator(object):
         self.floors.append(Floor(pipeline))
 
     def die(self):
-        glClearColor(1,0,0,1)
         self.on = False
 
 
@@ -230,3 +233,74 @@ class Background(object):
 
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "transform"), 1, GL_TRUE, tr.scale(2,2,1))
         pipeline.drawCall(self.model)
+
+class Menus(object):
+    def __init__(self,pipeline):
+
+        #Ganar
+        victory = bs.createTextureQuad(1,1)
+        gpuVictory = es.GPUShape().initBuffers()
+        pipeline.setupVAO(gpuVictory)
+        gpuVictory.fillBuffers(victory.vertices, victory.indices, GL_STATIC_DRAW)
+        gpuVictory.texture = es.textureSimpleSetup(
+            getAssetPath("you_won.png"), GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_NEAREST, GL_NEAREST)
+
+        self.victory = gpuVictory
+
+        #Perder
+        lose = bs.createTextureQuad(1,1)
+        gpuLose = es.GPUShape().initBuffers()
+        pipeline.setupVAO(gpuLose)
+        gpuLose.fillBuffers(lose.vertices, lose.indices, GL_STATIC_DRAW)
+        gpuLose.texture = es.textureSimpleSetup(
+            getAssetPath("game_over.png"), GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_NEAREST, GL_NEAREST)
+
+        self.lose = gpuLose
+
+        #Inicio ''''''
+        ''' HAY UN PLACEHOLDER ACA'''
+        main = bs.createTextureQuad(1,1)
+        gpuMain = es.GPUShape().initBuffers()
+        pipeline.setupVAO(gpuMain)
+        gpuMain.fillBuffers(main.vertices, main.indices, GL_STATIC_DRAW)
+        gpuMain.texture = es.textureSimpleSetup(
+            getAssetPath("pholder.png"), GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_NEAREST, GL_NEAREST)
+
+        self.main = gpuMain   
+        self.on = False
+
+    def draw_victory(self,pipeline):
+        glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "transform"), 1, GL_TRUE, tr.scale(1,1,1))
+        pipeline.drawCall(self.victory)
+ 
+    def draw_lose(self,pipeline):
+        glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "transform"), 1, GL_TRUE, tr.scale(1,1,1))
+        pipeline.drawCall(self.lose)  
+
+    def draw_main(self,pipeline):
+        glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "transform"), 1, GL_TRUE, tr.scale(1.5,1,1))
+        pipeline.drawCall(self.main)  
+
+    def update(self):
+        return          
+
+class Score(object):
+    pipe: Optional['Pipe']
+
+    def __init__(self,pipeline):
+
+        score = bs.createTextureQuad(1,1)
+        gpuScore = es.GPUShape().initBuffers()
+        pipeline.setupVAO(gpuScore)
+        gpuScore.fillBuffers(score.vertices, score.indices, GL_STATIC_DRAW) 
+
+        self.model = gpuScore
+        self.score = 0
+        self.goal = 0
+
+    def score_up(self,pipe):
+
+        if -0.122<=pipe.pos_x <= -0.120:
+            self.score += 1
+            print('tu puntuacion es:',self.score)
+

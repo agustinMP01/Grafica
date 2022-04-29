@@ -2,28 +2,43 @@ import glfw
 import sys
 from modelo import Flappy
 from typing import Optional 
+from modelo import Menus
+from modelo import PipeGenerator
 
 class Controller(object):
     flappy: Optional['Flappy']
+    menu: Optional['Menus']
+    gen: Optional['PipeGenerator']
 
     def __init__(self):
         self.flappy = None
-
+        self.menu = None
+        self.gen = None
 
     def set_flappy(self,f):
         self.flappy = f
 
+    def set_menu(self,m):
+        self.menu = m    
+
+    def set_gen(self,g):
+        self.gen = g
+
     def on_key(self,window,key,scancode,action,mods):
         if not (action == glfw.PRESS):
             return
-
-        #No funciona, no se cierra de verdad    
+  
         if key == glfw.KEY_ESCAPE:
             glfw.set_window_should_close(window, True)
-
 
         #Pasar los eventos la modelo
         elif key == glfw.KEY_UP and action == glfw.PRESS:
             self.flappy.move_up()    
+            
+        elif key == glfw.KEY_ENTER and action == glfw.PRESS:
+            self.menu.on = True
+            self.gen.on = True
+            self.flappy.alive = True
+
 
 
