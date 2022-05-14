@@ -246,7 +246,7 @@ class Menus(object):
         self.lose = gpuLose
 
         #Inicio ''''''
-        ''' HAY UN PLACEHOLDER ACA'''
+ 
         main = bs.createTextureQuad(1,1)
         gpuMain = es.GPUShape().initBuffers()
         pipeline.setupVAO(gpuMain)
@@ -335,7 +335,7 @@ class Score(object):
     def udpate(self, pipes: 'PipeGenerator'):
 
         for p in pipes.pipes:
-            eps = 0.0018
+            eps = 0.05
             if -0.25-eps<=p.pos_x <= -0.25+eps:
                 self.score += 1
 
